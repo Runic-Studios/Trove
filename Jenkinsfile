@@ -11,7 +11,7 @@ pipeline {
         PROJECT_NAME = 'Trove Server'
         IMAGE_NAME = 'trove-server'
         REGISTRY = 'registry.runicrealms.com'
-        REGISTRY_PROJECT = 'library'
+        REGISTRY_PROJECT = 'build'
     }
 
     stages {
