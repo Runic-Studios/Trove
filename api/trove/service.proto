@@ -3,6 +3,9 @@ syntax = "proto3";
 package trove;
 
 option go_package = "github.com/Runic-Studios/Trove/server/gen/api/trove;trove";
+option java_package = "com.runicrealms.trove.generated.api";
+option java_outer_classname = "Trove";
+option java_multiple_files = true;
 
 // A request to save data (already in the latest version).
 message SaveDataRequest {
