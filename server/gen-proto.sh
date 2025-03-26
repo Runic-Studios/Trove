@@ -2,10 +2,10 @@
 set -e
 
 # Proto roots
-PROTO_API_ROOT="api"
+PROTO_API_ROOT="../api"
 
 # 💡 Change this to the path you want generated Go files to live in
-GEN_OUT="server/gen/$PROTO_API_ROOT"
+GEN_OUT="gen/$PROTO_API_ROOT"
 
 # Create output dir if needed
 mkdir -p "$GEN_OUT"

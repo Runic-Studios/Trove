@@ -42,9 +42,7 @@ Install go 1.24.1, and protoc v29.4
 ```sh
 cd server
 go mod init
-cd ..
 ./gen-proto.sh
-cd server
 go mod tidy
 ```
 You can also build the docker image using `trove-server.Dockerfile`

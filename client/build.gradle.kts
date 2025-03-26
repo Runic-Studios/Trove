@@ -1,5 +1,4 @@
 import com.google.protobuf.gradle.id
-import org.jetbrains.kotlin.fir.declarations.builder.buildScript
 import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
@@ -7,6 +6,7 @@ plugins {
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.google.protobuf") version "0.9.4"
+    `maven-publish`
 }
 
 group = "com.runicrealms.trove"
@@ -83,3 +83,23 @@ tasks.named("jar") {
     enabled = true
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            groupId = project.group.toString()
+            artifactId = project.archivesName.toString()
+            version = project.version.toString()
+        }
+    }
+    repositories {
+        maven {
+            name = "nexus"
+            url = uri("https://nexus.runicrealms.com/repository/maven-releases/")
+            credentials {
+                username = project.findProperty("nexusUsername") as String
+                password = project.findProperty("nexusPassword") as String
+            }
+        }
+    }
+}

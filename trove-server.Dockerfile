@@ -19,7 +19,7 @@ WORKDIR /app/server
 RUN go mod tidy
 
 WORKDIR /app
-RUN chmod +x ./gen-proto.sh && ./gen-proto.sh
+RUN cd server && chmod +x ./gen-proto.sh && ./gen-proto.sh && cd ..
 
 WORKDIR /app/server
 RUN go build -o trove-server ./cmd

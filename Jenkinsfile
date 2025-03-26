@@ -36,11 +36,23 @@ pipeline {
                 }
             }
         }
-        stage('Build and Push Docker Image') {
+        stage('Build and Push Server Docker Image') {
             steps {
                 container('jenkins-agent') {
                     script {
                         dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                    }
+                }
+            }
+        }
+        stage('Build and Publish Client Artifact') {
+            steps {
+                container('jenkins-agent') {
+                    dir('client') {
+                        script {
+                            sh "gradle clean build"
+                            nexusPublish()
+                        }
                     }
                 }
             }
