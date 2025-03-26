@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package trove;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/trove;trove";
+
+// A request to save data (already in the latest version).
+message SaveDataRequest {
+  string database_name = 1;  // e.g. "players"
+  int32 schema_version = 2;  // version of the data (should be LATEST_VERSION if the client is up-to-date)
+  bytes data_blob = 3;       // serialized protobuf
+  string record_id = 4;      // unique ID, e.g. player_id
+}
+
+message SaveDataResponse {
+  bool success = 1;
+  string error_message = 2;  // if success=false, explains why
+}
+
+// Request to load data
+message LoadDataRequest {
+  string database_name = 1;
+  string record_id = 2;
+}
+
+// Always returns the data in the *latest* version
+message LoadDataResponse {
+  bool success = 1;
+  string error_message = 2;
+
+  // The final data (already upgraded to the latest version)
+  bytes data_blob = 3;
+}
+
+service TroveService {
+  rpc SaveData(SaveDataRequest) returns (SaveDataResponse);
+  rpc LoadData(LoadDataRequest) returns (LoadDataResponse);
+}

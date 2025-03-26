@@ -1,0 +1,42 @@
+# General
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+*.idea/
+*.vscode/
+.env
+.env.*
+
+# Go
+/server/bin/
+/server/gen/
+/server/trove-server
+/server/coverage.out
+/server/go.sum
+
+# Go build cache (optional if not using Go modules)
+**/_testmain.go
+**/*.test
+*.out
+
+# Java/Kotlin (future client)
+/client/build/
+/client/out/
+/client/.gradle/
+/client/.idea/
+/client/.classpath
+/client/.project
+/client/.settings/
+/client/target/
+/client/*.iml
+
+# Protobuf artifacts (generated code)
+/**/*.pb.go
+/**/*.pb.gw.go
+
+# OS & Editor
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
