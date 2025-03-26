@@ -31,6 +31,11 @@ The client component is written in Kotlin and is designed to run on top of Paper
   - The evolving database schemas for different databases, in `api/db_schema/DATABASE_NAME/v?/*.proto`
   - RPC specs for the trove-server gRPC communication
 
+WARNING:
+- Note that neither the trove-client nor the trove-server perform schema validation on what you are storing.
+  - This is because doing so could slow down the trove-server, and require it to have a hard reference to the latest schema.
+  - However, schema validation on the trove-client may be implemented in a later version.
+
 ## Building
 ### Trove Server
 Install go 1.24.1, and protoc v29.4
