@@ -14,7 +14,6 @@
 /server/gen/
 /server/trove-server
 /server/coverage.out
-/server/go.sum
 
 # Go build cache (optional if not using Go modules)
 **/_testmain.go
