@@ -97,8 +97,8 @@ publishing {
             name = "nexus"
             url = uri("https://nexus.runicrealms.com/repository/maven-releases/")
             credentials {
-                username = project.findProperty("nexusUsername") as String
-                password = project.findProperty("nexusPassword") as String
+                username = System.getenv("NEXUS_USERNAME")
+                password = System.getenv("NEXUS_PASSWORD")
             }
         }
     }
