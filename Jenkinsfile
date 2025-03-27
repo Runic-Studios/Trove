@@ -40,7 +40,7 @@ pipeline {
             steps {
                 container('jenkins-agent') {
                     script {
-                        dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                        dockerBuildPush("trove-server.Dockerfile", IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                     }
                 }
             }
