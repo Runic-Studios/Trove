@@ -88,7 +88,7 @@ publishing {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
             groupId = project.group.toString()
-            artifactId = project.archivesName.toString()
+            artifactId = project.archivesName.get()
             version = project.version.toString()
         }
     }
@@ -96,10 +96,6 @@ publishing {
         maven {
             name = "nexus"
             url = uri("https://nexus.runicrealms.com/repository/maven-releases/")
-            credentials {
-                username = System.getenv("NEXUS_USERNAME")
-                password = System.getenv("NEXUS_PASSWORD")
-            }
         }
     }
 }
