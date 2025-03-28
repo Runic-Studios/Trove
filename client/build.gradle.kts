@@ -96,6 +96,7 @@ publishing {
         maven {
             name = "nexus"
             url = uri("http://nexus.runicrealms.com/repository/maven-releases/")
+            isAllowInsecureProtocol = true
         }
     }
 }
