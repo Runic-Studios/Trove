@@ -95,7 +95,7 @@ publishing {
     repositories {
         maven {
             name = "nexus"
-            url = uri("https://nexus.runicrealms.com/repository/maven-releases/")
+            url = uri("http://nexus.runicrealms.com/repository/maven-releases/")
         }
     }
 }
