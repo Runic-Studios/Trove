@@ -95,8 +95,7 @@ publishing {
     repositories {
         maven {
             name = "nexus"
-            url = uri("http://nexus.runicrealms.com/repository/maven-snapshots/")
-            isAllowInsecureProtocol = true
+            url = uri("https://nexus.runicrealms.com/repository/maven-snapshots/")
             credentials {
                 username = System.getenv("NEXUS_USERNAME")
                 password = System.getenv("NEXUS_PASSWORD")
