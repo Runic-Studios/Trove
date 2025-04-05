@@ -50,7 +50,7 @@ pipeline {
                 container('jenkins-agent') {
                     dir('client') {
                         script {
-                            sh "gradle clean build --no-daemon"
+                            sh "./gradlew clean build --no-daemon"
                             nexusPublish()
                         }
                     }
