@@ -57,13 +57,13 @@ pipeline {
                 }
             }
         }
-        stage('Update Deployment') {
-            steps {
-                container('jenkins-agent') {
-                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
-                }
-            }
-        }
+//         stage('Update Deployment') {
+//             steps {
+//                 container('jenkins-agent') {
+//                     updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'TODO')
+//                 }
+//             }
+//         }
         stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
             when {
                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
