@@ -1,12 +1,6 @@
 @Library('Jenkins-Shared-Lib') _
 
 pipeline {
-    agent {
-        kubernetes {
-            yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-go-protoc:latest")
-        }
-    }
-
     environment {
         PROJECT_NAME = 'Trove Server'
         IMAGE_NAME = 'trove-server'
@@ -37,6 +31,11 @@ pipeline {
             }
         }
         stage('Build and Push Server Docker Image') {
+            agent {
+                kubernetes {
+                    yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-go-protoc:latest")
+                }
+            }
             steps {
                 container('jenkins-agent') {
                     script {
@@ -53,6 +52,11 @@ pipeline {
             }
         }
         stage('Build and Publish Client Artifact') {
+            agent {
+                kubernetes {
+                    yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-java-21:latest")
+                }
+            }
             steps {
                 container('jenkins-agent') {
                     dir('client') {
