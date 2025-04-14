@@ -1,6 +1,15 @@
 @Library('Jenkins-Shared-Lib') _
 
 pipeline {
+    agent {
+        kubernetes {
+            yaml jenkinsAgent(
+                [ 'agent-go-protoc': 'registry.runicrealms.com/jenkins/agent-go-protoc:latest' ],
+                [ 'agent-java-21': 'registry.runicrealms.com/jenkins/agent-java-21:latest' ]
+            )
+        }
+    }
+
     environment {
         PROJECT_NAME = 'Trove Server'
         IMAGE_NAME = 'trove-server'
@@ -10,13 +19,11 @@ pipeline {
 
     stages {
         stage('Send Discord Notification (Build Start)') {
-            agent { label 'any' }
             steps {
                 discordNotifyStart(env.PROJECT_NAME, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
             }
         }
         stage('Determine Environment') {
-            agent { label 'any' }
             steps {
                 script {
                     def branchName = env.GIT_BRANCH.replaceAll(/^origin\//, '').replaceAll(/^refs\/heads\//, '')
@@ -33,13 +40,8 @@ pipeline {
             }
         }
         stage('Build and Push Server Docker Image') {
-            agent {
-                kubernetes {
-                    yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-go-protoc:latest")
-                }
-            }
             steps {
-                container('jenkins-agent') {
+                container('agent-go-protoc') {
                     script {
                     sh """
                     cd server
@@ -54,13 +56,8 @@ pipeline {
             }
         }
         stage('Build and Publish Client Artifact') {
-            agent {
-                kubernetes {
-                    yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-java-21:latest")
-                }
-            }
             steps {
-                container('jenkins-agent') {
+                container('agent-java-21') {
                     dir('client') {
                         script {
                             sh "./gradlew clean build --no-daemon"
