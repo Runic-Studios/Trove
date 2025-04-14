@@ -3,10 +3,10 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent(
-                [ 'agent-go-protoc': 'registry.runicrealms.com/jenkins/agent-go-protoc:latest' ],
-                [ 'agent-java-21': 'registry.runicrealms.com/jenkins/agent-java-21:latest' ]
-            )
+            yaml jenkinsAgent([
+                'agent-go-protoc': 'registry.runicrealms.com/jenkins/agent-go-protoc:latest',
+                'agent-java-21': 'registry.runicrealms.com/jenkins/agent-java-21:latest'
+            ])
         }
     }
 
