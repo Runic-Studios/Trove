@@ -3,7 +3,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent("registry.runicrealms.com")
+            yaml jenkinsAgent("registry.runicrealms.com/jenkins/agent-go-protoc:latest")
         }
     }
 
@@ -40,7 +40,13 @@ pipeline {
             steps {
                 container('jenkins-agent') {
                     script {
-                        dockerBuildPush("trove-server.Dockerfile", IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                    sh """
+                    cd server
+                    ./gen-proto.sh
+                    go mod download
+                    go build -o trove-server ./cmd
+                    """
+                    dockerBuildPush("trove-server.Dockerfile", IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                     }
                 }
             }
@@ -64,16 +70,16 @@ pipeline {
 //                 }
 //             }
 //         }
-        stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
-            when {
-                expression { return env.RUN_MAIN_DEPLOY == 'true' }
-            }
-            steps {
-                container('jenkins-agent') {
-                    createPR('Trove', 'Realm-Deployment', 'dev', 'main')
-                }
-            }
-        }
+//         stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
+//             when {
+//                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
+//             }
+//             steps {
+//                 container('jenkins-agent') {
+//                     createPR('Trove', 'Realm-Deployment', 'dev', 'main')
+//                 }
+//             }
+//         }
     }
 
     post {
