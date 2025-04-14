@@ -42,7 +42,7 @@ pipeline {
                     script {
                     sh """
                     cd server
-                    export PATH="$PATH:$(go env GOPATH)/bin"
+                    export PATH="\$PATH:\$(go env GOPATH)/bin"
                     ./gen-proto.sh
                     go mod download
                     go build -o trove-server ./cmd
