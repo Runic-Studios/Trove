@@ -45,7 +45,7 @@ pipeline {
                     export PATH="\$PATH:\$(go env GOPATH)/bin"
                     ./gen-proto.sh
                     go mod download
-                    go build -o trove-server ./cmd
+                    go build -buildvcs=false -o trove-server ./cmd
                     """
                     dockerBuildPush("trove-server.Dockerfile", IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                     }
