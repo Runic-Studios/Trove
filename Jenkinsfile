@@ -10,11 +10,13 @@ pipeline {
 
     stages {
         stage('Send Discord Notification (Build Start)') {
+            agent { label 'any' }
             steps {
                 discordNotifyStart(env.PROJECT_NAME, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
             }
         }
         stage('Determine Environment') {
+            agent { label 'any' }
             steps {
                 script {
                     def branchName = env.GIT_BRANCH.replaceAll(/^origin\//, '').replaceAll(/^refs\/heads\//, '')
