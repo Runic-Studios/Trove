@@ -27,7 +27,7 @@ func NewSession() (*gocql.Session, error) {
 }
 
 // SaveRecord inserts or updates to db
-func SaveRecord(session *gocql.Session, databaseName, recordID string, version int, data []byte) error {
+func SaveRecord(session *gocql.Session, databaseName, recordID string, version string, data []byte) error {
 	// e.g. table: trove.players_records, trove.guilds_records, etc.
 	table := fmt.Sprintf("%s_records", databaseName)
 
@@ -38,7 +38,7 @@ func SaveRecord(session *gocql.Session, databaseName, recordID string, version i
 // Record for reading
 type Record struct {
 	RecordID string
-	Version  int
+	Version  string
 	Data     []byte
 }
 

@@ -1,17 +1,13 @@
 import com.google.protobuf.gradle.id
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    id("org.springframework.boot") version "3.4.3"
-    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("jvm") version "2.1.20"
     id("com.google.protobuf") version "0.9.4"
     `maven-publish`
 }
 
 group = "com.runicrealms.trove"
 version = "0.0.1-SNAPSHOT"
-archivesName = "trove-client"
 
 java {
     withJavadocJar()
@@ -23,10 +19,6 @@ repositories {
 }
 
 dependencies {
-    // Spring + Kotlin basics
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.4.4"))
-    implementation("org.springframework.boot:spring-boot-starter")
-
     // gRPC + protobuf
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("io.grpc:grpc-netty:1.71.0")
@@ -37,8 +29,8 @@ dependencies {
     // For logging, config, etc.
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
-    // Test
-    testImplementation(kotlin("test"))
+    // For library injection
+    implementation("com.google.inject:guice:7.0.0")
 }
 
 protobuf {
@@ -63,11 +55,13 @@ protobuf {
     }
 }
 
+val currentPlayersSchemaVersion = "v3"
+
 sourceSets {
     main {
         proto {
-            // Does not include proto schemas
             srcDir("../api/trove")
+            srcDir("../api/db_schema/players/$currentPlayersSchemaVersion")
         }
     }
 }
@@ -76,11 +70,11 @@ tasks.named("compileJava") {
     dependsOn("generateProto")
 }
 
-tasks.named("bootJar") {
-    enabled = false
-}
-tasks.named("jar") {
+val archiveName = "trove-client"
+
+tasks.jar {
     enabled = true
+    archiveBaseName = archiveName
 }
 
 publishing {
@@ -88,7 +82,7 @@ publishing {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
             groupId = project.group.toString()
-            artifactId = project.archivesName.get()
+            artifactId = archiveName
             version = project.version.toString()
         }
     }

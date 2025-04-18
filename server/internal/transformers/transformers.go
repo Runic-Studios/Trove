@@ -7,10 +7,10 @@ import (
 
 // PlayersTransformer transformer specifically for transforming data in the players database
 var PlayersTransformer = &service.TransformerChain{
-	LatestVersion: 2,
+	LatestVersion: "v3",
 	// Example transformer
 	Links: map[service.VersionPair]service.TransformerFunc{
-		{1, 2}: players.V1ToV2,
+		{"v1", "v2"}: players.V1ToV2,
 	},
 }
 

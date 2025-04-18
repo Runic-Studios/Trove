@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package db_schema.players.v3;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/db_schema/players/v3;v3";
+option java_package = "com.runicrealms.trove.generated.api.schema.players";
+option java_outer_classname = "Player";
+option java_multiple_files = true;
+
+message PlayerData {
+  string uuid = 1;
+  string guild = 2;
+  repeated CharacterData characters = 3;
+}
+
+message CharacterData {
+  int32 slot = 1;
+  ClassType class = 2;
+  int64 exp = 3;
+  int32 level = 4;
+  int32 health = 5;
+  int32 hunger = 6;
+  Location location = 7;
+  bool outlaw = 8;
+  google.protobuf.Timestamp lastLogin = 9;
+  google.protobuf.Duration playTime = 10;
+  SkillData skills = 11;
+  SpellData spells = 12;
+  map<int32, Item> inventory = 13;
+
+  message SkillData {
+    int32 positionOneAllocated = 1;
+    int32 positionTwoAllocated = 2;
+    int32 positionThreeAllocated = 3;
+  }
+
+  enum SpellType {
+    NONE = 0;
+    ARCHER_AMBUSH = 1;
+    ARCHER_FADE = 2;
+    ARCHER_GIFTS_OF_THE_GROVE = 3;
+    ARCHER_JOLT = 4;
+    ARCHER_LEAPING_SHOT = 5;
+    // TODO
+  }
+
+  message SpellData {
+    SpellType spellOne = 1;
+    SpellType spellTwo = 2;
+    SpellType spellThree = 3;
+    SpellType spellFour = 4;
+  }
+}
+
+enum ClassType {
+  ARCHER = 0;
+  CLERIC = 1;
+  MAGE = 2;
+  ROGUE = 3;
+  WARRIOR = 4;
+}
+
+message TitleData {
+
+}
+
+message Location {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double pitch = 4;
+  double yaw = 5;
+}
+
+message Item {
+  string templateID = 1;
+  int32 count = 2;
+  map<string, string> data = 3;
+  repeated string lore = 4;
+  oneof typeData {
+    Armor armor = 5;
+    Gem gem = 6;
+    Trigger trigger = 7;
+    Offhand offhand = 8;
+    Weapon weapon = 9;
+  }
+
+  message Armor {
+    int32 level = 1;
+    ClassType class = 2;
+    RarityType rarity = 3;
+    int32 health = 4;
+    repeated Stat stats = 5;
+    repeated GemBonus gemBonuses = 6;
+    int32 maxGemSlots = 7;
+    repeated Perk perks = 8;
+  }
+
+  message Gem {
+    GemBonus bonus = 1;
+  }
+
+  message Trigger {
+    optional string rightClickAction = 1;
+    optional string shiftRightClickAction = 2;
+    optional string leftClickAction = 3;
+    optional string shiftLeftClickAction = 4;
+  }
+
+  message Offhand {
+    int32 level = 1;
+    repeated Stat stats = 2;
+    RarityType rarity = 3;
+    repeated Perk perks = 4;
+  }
+
+  message Weapon {
+    int32 level = 1;
+    ClassType class = 2;
+    RarityType rarity = 3;
+    int32 minDamage = 4;
+    int32 maxDamage = 5;
+    repeated Stat stats = 6;
+    repeated Perk perks = 7;
+    optional string skinID = 8;
+  }
+
+  enum RarityType {
+    COMMON = 0;
+    UNCOMMON = 1;
+    RARE = 2;
+    EPIC = 3;
+    LEGENDARY = 4;
+    UNIQUE = 5;
+    CRAFTED = 6;
+  }
+
+  enum StatType {
+    DEXTERITY = 0;
+    INTELLIGENCE = 1;
+    STRENGTH = 2;
+    VITALITY = 3;
+    WISDOM = 4;
+  }
+
+  message Stat {
+    StatType type = 1;
+    int32 minRange = 2;
+    int32 maxRange = 3;
+    double rollPercentage = 4;
+  }
+
+  message GemBonus {
+    repeated Stat stats = 1;
+    int32 health = 2;
+    StatType mainStat = 3;
+    int32 tier = 4;
+  }
+
+  message Perk {
+    string perkID = 1;
+    int32 stacks = 2;
+  }
+}

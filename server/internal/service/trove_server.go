@@ -31,7 +31,7 @@ func (t *TroveServer) SaveData(_ context.Context, req *trove.SaveDataRequest) (*
 		}, nil
 	}
 
-	err := db.SaveRecord(t.session, req.GetDatabaseName(), req.GetRecordId(), int(req.GetSchemaVersion()), req.GetDataBlob())
+	err := db.SaveRecord(t.session, req.GetDatabaseName(), req.GetRecordId(), req.GetSchemaVersion(), req.GetDataBlob())
 	if err != nil {
 		return &trove.SaveDataResponse{
 			Success:      false,
