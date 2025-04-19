@@ -11,7 +11,7 @@ class TroveClientProvider @Inject constructor(private val config: TroveClientCon
             .forAddress(config.host, config.port)
             .usePlaintext()
             .build()
-        return TroveClient(channel)
+        return TroveClient(channel, config.clientName)
     }
 
 }

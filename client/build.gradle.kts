@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.runicrealms.trove"
-version = "0.0.1-SNAPSHOT"
+version = "1.0"
 
 java {
     withJavadocJar()
@@ -55,13 +55,14 @@ protobuf {
     }
 }
 
-val currentPlayersSchemaVersion = "v3"
+val currentPlayersSchemaVersion = "v1"
 
 sourceSets {
     main {
         proto {
+            srcDir("../api")
             srcDir("../api/trove")
-            srcDir("../api/db_schema/players/$currentPlayersSchemaVersion")
+            srcDir("../api/schema/$currentPlayersSchemaVersion")
         }
     }
 }

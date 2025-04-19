@@ -3,39 +3,84 @@ syntax = "proto3";
 package trove;
 
 option go_package = "github.com/Runic-Studios/Trove/server/gen/api/trove;trove";
-option java_package = "com.runicrealms.trove.generated.api";
+option java_package = "com.runicrealms.trove.generated.api.trove";
 option java_outer_classname = "Trove";
 option java_multiple_files = true;
 
-// A request to save data (already in the latest version).
-message SaveDataRequest {
-  string database_name = 1;  // e.g. "players"
-  string schema_version = 2;  // version of the data (should be LATEST_VERSION if the client is up-to-date)
-  bytes data_blob = 3;       // serialized protobuf
-  string record_id = 4;      // unique ID, e.g. player_id
+// ====== Locking ======
+
+// Request to acquire or renew a lock on a player's record
+message ClaimLockRequest {
+  string user_id = 1;       // UUID of the player
+  string server_id = 2;       // Unique string identifying the game server
+  int64 lease_millis = 3;     // Requested lease duration (e.g. 30000 for 30s)
 }
 
-message SaveDataResponse {
-  bool success = 1;
-  string error_message = 2;  // if success=false, explains why
-}
-
-// Request to load data
-message LoadDataRequest {
-  string database_name = 1;
-  string record_id = 2;
-}
-
-// Always returns the data in the *latest* version
-message LoadDataResponse {
+message ClaimLockResponse {
   bool success = 1;
   string error_message = 2;
+  int64 expires_at_unix_millis = 3;
+}
 
-  // The final data (already upgraded to the latest version)
-  bytes data_blob = 3;
+// Request to release a previously held lock
+message ReleaseLockRequest {
+  string user_id = 1;
+  string server_id = 2;
+}
+
+message ReleaseLockResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+message LockInfo {
+  string user_id = 1;
+  string server_id = 2;
+}
+
+// A request to save a single column of data to a given row
+message SaveRequest {
+  string table = 1;
+  map<string, string> super_keys = 2; // Column -> value select
+  map<string, bytes> column_data = 3; // Column -> data save
+  LockInfo lock = 4;
+}
+
+message SaveResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+message LoadRequest {
+  string table = 1;
+  map<string, string> super_keys = 2;
+  repeated string columns = 3;
+  LockInfo lock = 4;
+}
+
+message LoadResponse {
+  bool success = 1;
+  string error_message = 2;
+  map<string, bytes> column_data = 3; // Column -> data loaded
+}
+
+message ExistsRequest {
+  string table = 1;
+  map<string, string> keys = 2;
+  LockInfo info = 3;
+}
+
+message ExistsResponse {
+  bool success = 1;
+  string error_message = 2;
+  bool exists = 3;
 }
 
 service TroveService {
-  rpc SaveData(SaveDataRequest) returns (SaveDataResponse);
-  rpc LoadData(LoadDataRequest) returns (LoadDataResponse);
+  rpc ClaimLock(ClaimLockRequest) returns (ClaimLockResponse);
+  rpc ReleaseLock(ReleaseLockRequest) returns (ReleaseLockResponse);
+
+  rpc Exists(ExistsRequest) returns (ExistsResponse);
+  rpc Save(SaveRequest) returns (SaveResponse);
+  rpc Load(LoadRequest) returns (LoadResponse);
 }

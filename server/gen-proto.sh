@@ -25,19 +25,20 @@ protoc \
   "$PROTO_API_ROOT/trove/service.proto"
 
 # === PLAYER SCHEMAS ===
-for dir in "$PROTO_API_ROOT/db_schema/players/"*/; do
-    version=$(basename "$dir")
-    PROTO_PATH="$dir/player.proto"
-    if [[ -f "$PROTO_PATH" ]]; then
-      echo "📦 Generating players schema: $version"
-      protoc \
-        --proto_path="$PROTO_API_ROOT" \
-        --go_out="$GEN_OUT" \
-        --go_opt=paths=source_relative \
-        "$PROTO_PATH"
-    else
-      echo "⚠️  Skipping $version (no player.proto found)"
-    fi
-done
+schema_root="$PROTO_API_ROOT/schema"
+proto_files=$(find "$schema_root" -name "*.proto")
+
+if [[ -n "$proto_files" ]]; then
+  echo "📦 Generating schema files from $schema_root"
+  protoc \
+    --proto_path="$PROTO_API_ROOT" \
+    --go_out="$GEN_OUT" \
+    --go_opt=paths=source_relative \
+    --go-grpc_out="$GEN_OUT" \
+    --go-grpc_opt=paths=source_relative \
+    $proto_files
+else
+  echo "⚠️  No .proto files found under $schema_root"
+fi
 
 echo "✅ Protobuf generation complete!"

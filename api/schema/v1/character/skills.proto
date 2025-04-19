@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package schema.v1.character;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1/character;characterv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.character";
+option java_multiple_files = true;
+
+message CharacterSkillsData {
+  int32 positionOneAllocated = 1;
+  int32 positionTwoAllocated = 2;
+  int32 positionThreeAllocated = 3;
+}

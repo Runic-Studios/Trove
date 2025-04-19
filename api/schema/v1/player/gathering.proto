@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package schema.v1.players;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/players/v1;playersv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.players";
+option java_multiple_files = true;
+
+message PlayerGatheringData {
+  int64 cookingExp = 1;
+  int64 farmingExp = 2;
+  int64 fishingExp = 3;
+  int64 harvestingExp = 4;
+  int64 miningExp = 5;
+  int64 woodcuttingExp = 6;
+}

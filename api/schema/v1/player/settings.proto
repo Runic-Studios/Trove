@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package schema.v1.players;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/players/v1;playersv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.players";
+option java_multiple_files = true;
+
+message PlayerSettingsData {
+  bool tips = 1;
+  map<string, ChatChannelSettings> chatChannels = 2;
+
+  message ChatChannelSettings {
+    bool muted = 1;
+    bool spy = 2;
+  }
+}

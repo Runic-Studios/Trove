@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package schema.v1;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
+option java_multiple_files = true;
+
+message LocationData {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double pitch = 4;
+  double yaw = 5;
+}

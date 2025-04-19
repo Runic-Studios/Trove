@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package schema.v1.character;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1/character;characterv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.character";
+option java_multiple_files = true;
+
+message CharacterSpellsData {
+  string spellOneID = 1;
+  string spellTwoID = 2;
+  string spellThreeID = 3;
+  string spellFourID = 4;
+}

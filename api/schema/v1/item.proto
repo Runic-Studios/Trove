@@ -1,81 +1,13 @@
 syntax = "proto3";
+import "schema/v1/class.proto";
 
-package db_schema.players.v3;
+package schema.v1;
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
-
-option go_package = "github.com/Runic-Studios/Trove/server/gen/api/db_schema/players/v3;v3";
-option java_package = "com.runicrealms.trove.generated.api.schema.players";
-option java_outer_classname = "Player";
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
 option java_multiple_files = true;
 
-message PlayerData {
-  string uuid = 1;
-  string guild = 2;
-  repeated CharacterData characters = 3;
-}
-
-message CharacterData {
-  int32 slot = 1;
-  ClassType class = 2;
-  int64 exp = 3;
-  int32 level = 4;
-  int32 health = 5;
-  int32 hunger = 6;
-  Location location = 7;
-  bool outlaw = 8;
-  google.protobuf.Timestamp lastLogin = 9;
-  google.protobuf.Duration playTime = 10;
-  SkillData skills = 11;
-  SpellData spells = 12;
-  map<int32, Item> inventory = 13;
-
-  message SkillData {
-    int32 positionOneAllocated = 1;
-    int32 positionTwoAllocated = 2;
-    int32 positionThreeAllocated = 3;
-  }
-
-  enum SpellType {
-    NONE = 0;
-    ARCHER_AMBUSH = 1;
-    ARCHER_FADE = 2;
-    ARCHER_GIFTS_OF_THE_GROVE = 3;
-    ARCHER_JOLT = 4;
-    ARCHER_LEAPING_SHOT = 5;
-    // TODO
-  }
-
-  message SpellData {
-    SpellType spellOne = 1;
-    SpellType spellTwo = 2;
-    SpellType spellThree = 3;
-    SpellType spellFour = 4;
-  }
-}
-
-enum ClassType {
-  ARCHER = 0;
-  CLERIC = 1;
-  MAGE = 2;
-  ROGUE = 3;
-  WARRIOR = 4;
-}
-
-message TitleData {
-
-}
-
-message Location {
-  double x = 1;
-  double y = 2;
-  double z = 3;
-  double pitch = 4;
-  double yaw = 5;
-}
-
-message Item {
+message ItemData {
   string templateID = 1;
   int32 count = 2;
   map<string, string> data = 3;
@@ -90,7 +22,7 @@ message Item {
 
   message Armor {
     int32 level = 1;
-    ClassType class = 2;
+    ClassType classType = 2;
     RarityType rarity = 3;
     int32 health = 4;
     repeated Stat stats = 5;

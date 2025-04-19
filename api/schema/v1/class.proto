@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package schema.v1;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
+option java_multiple_files = true;
+
+enum ClassType {
+  ARCHER = 0;
+  CLERIC = 1;
+  MAGE = 2;
+  ROGUE = 3;
+  WARRIOR = 4;
+}

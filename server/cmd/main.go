@@ -32,7 +32,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	srv := service.NewTroveServer(sess, transformers.Transformers)
+	srv := service.NewTroveServer(sess, transformers.V1Transformer)
 	trove.RegisterTroveServiceServer(grpcServer, srv)
 
 	fmt.Printf("Trove-Server listening on :%s\n", port)
