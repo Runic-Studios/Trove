@@ -67,7 +67,7 @@ message LoadResponse {
 message ExistsRequest {
   string table = 1;
   map<string, string> keys = 2;
-  LockInfo info = 3;
+  LockInfo lock = 3;
 }
 
 message ExistsResponse {

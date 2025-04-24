@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.runicrealms.trove"
-version = "1.0"
+version = "0.0.7-SNAPSHOT"
 
 java {
     withJavadocJar()
@@ -23,7 +23,7 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("io.grpc:grpc-netty:1.71.0")
     implementation("com.google.protobuf:protobuf-java:4.30.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("io.grpc:grpc-protobuf:1.71.0")
 
     // For logging, config, etc.

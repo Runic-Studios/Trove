@@ -4,7 +4,8 @@ import com.runicrealms.trove.client.user.player.PlayerColumn
 import com.runicrealms.trove.generated.api.trove.LockInfo
 import com.runicrealms.trove.generated.api.trove.SaveRequest
 import com.runicrealms.trove.generated.api.trove.TroveServiceGrpcKt
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 abstract class UserChangeStager(
     private val stub: TroveServiceGrpcKt.TroveServiceCoroutineStub,
@@ -13,32 +14,37 @@ abstract class UserChangeStager(
     protected val columns: Collection<UserColumn>
 ) {
 
-    @Synchronized
-    fun save(): Result<Unit> = runBlocking {
-        val request = SaveRequest.newBuilder()
-            .setTable(PlayerColumn.TABLE_NAME)
-            .setLock(lock)
-            .putAllSuperKeys(superKeys)
-        for (column in columns) {
-            if (column.stagedChanges != null) {
-                request.putColumnData(column.column, column.stagedChanges!!)
+    private val stageMutex = Mutex()
+
+    suspend fun save(): Result<Unit> {
+        stageMutex.withLock {
+            val request = SaveRequest.newBuilder()
+                .setTable(PlayerColumn.TABLE_NAME)
+                .setLock(lock)
+                .putAllSuperKeys(superKeys)
+            for (column in columns) {
+                val data = column.pendingChanges
+                if (data != null) {
+                    column.stagedChanges = data
+                    request.putColumnData(column.column, data)
+                }
             }
-        }
-        if (request.columnDataCount > 0) {
-            val response = stub.save(request.build())
-            if (!response.success) {
-                return@runBlocking Result.failure(IllegalStateException(response.errorMessage))
+            if (request.columnDataCount > 0) {
+                val response = stub.save(request.build())
+                if (!response.success) {
+                    return Result.failure(IllegalStateException(response.errorMessage))
+                }
             }
+            for (column in columns) {
+                column.stagedChanges = null
+                column.pendingChanges = null
+            }
+            return Result.success(Unit)
         }
-        for (column in columns) {
-            column.stagedChanges = null
-        }
-        return@runBlocking Result.success(Unit)
     }
 
-    @Synchronized
     fun stageChanges(column: PlayerColumn) {
-        column.stagedChanges = column.getRawData()
+        column.pendingChanges = column.getRawData()
     }
 
 }

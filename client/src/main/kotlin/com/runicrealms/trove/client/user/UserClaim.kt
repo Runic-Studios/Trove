@@ -1,12 +1,9 @@
 package com.runicrealms.trove.client.user
 
-import com.runicrealms.trove.client.user.player.Player
 import com.runicrealms.trove.generated.api.trove.ClaimLockRequest
 import com.runicrealms.trove.generated.api.trove.LockInfo
 import com.runicrealms.trove.generated.api.trove.ReleaseLockRequest
 import com.runicrealms.trove.generated.api.trove.TroveServiceGrpcKt
-import com.runicrealms.trove.client.user.character.Character
-import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
 class UserClaim internal constructor(
@@ -18,9 +15,9 @@ class UserClaim internal constructor(
 
     private var open = true
 
-    fun refreshLease(): Result<Unit> = runBlocking {
+    suspend fun refreshLease(): Result<Unit> {
         if (!open) {
-            return@runBlocking Result.failure(IllegalStateException("Lease has already been closed, please open new claim"))
+            return Result.failure(IllegalStateException("Lease has already been closed, please open new claim"))
         }
         val response = stub.claimLock(
             ClaimLockRequest.newBuilder()
@@ -30,20 +27,20 @@ class UserClaim internal constructor(
                 .build()
         )
         if (!response.success) {
-            return@runBlocking Result.failure(IllegalStateException(response.errorMessage))
+            return Result.failure(IllegalStateException(response.errorMessage))
         }
-        Result.success(Unit)
+        return Result.success(Unit)
     }
 
-    fun loadPlayer(): Result<Player> = runBlocking {
-        return@runBlocking Player.load(user, stub, lock)
+    suspend fun loadPlayer(): Result<UserPlayerData> {
+        return UserPlayerData.loadOrCreate(UserPlayerData.Potential(user, stub, lock))
     }
 
-    fun loadCharacter(slot: Int): Result<Character> = runBlocking {
-        return@runBlocking Character.load(user, slot, stub, lock)
+    suspend fun loadCharacter(slot: Int): Result<UserCharacterData> {
+        return UserCharacterData.load(UserCharacterData.Potential(user, slot, stub, lock))
     }
 
-    fun releaseAndClose(): Result<Unit> = runBlocking {
+    suspend fun releaseAndClose(): Result<Unit> {
         val response = stub.releaseLock(
             ReleaseLockRequest.newBuilder()
                 .setUserId(lock.userId)
@@ -51,10 +48,10 @@ class UserClaim internal constructor(
                 .build()
         )
         if (!response.success) {
-            return@runBlocking Result.failure(IllegalStateException(response.errorMessage))
+            return Result.failure(IllegalStateException(response.errorMessage))
         }
         open = false
-        Result.success(Unit)
+        return Result.success(Unit)
     }
 
 }

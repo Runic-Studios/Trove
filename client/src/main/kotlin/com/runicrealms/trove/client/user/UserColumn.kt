@@ -9,6 +9,10 @@ abstract class UserColumn(
 
     internal abstract fun getRawData(): ByteString
 
+    @Volatile
+    internal var pendingChanges: ByteString? = null
+
+    @Volatile
     internal var stagedChanges: ByteString? = null
 
 }
