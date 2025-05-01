@@ -163,42 +163,57 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 
 // === LOCK MANAGEMENT ===
 
-// ClaimLock tries to INSERT or RENEW a lock for the given player.
+// ClaimLock tries to INSERT, RENEW, or TAKEOVER a lock for the given player.
 // Returns (acquiredOrRenewed, expiresAt, error).
 func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int64) (bool, time.Time, error) {
 	now := time.Now()
 	expires := now.Add(time.Duration(leaseMillis) * time.Millisecond)
 
-	// Try ACQUIRE
+	// 1) ACQUIRE: insert if no lock exists yet
 	const acquireCQL = `
-		INSERT INTO user_locks
-			(user_id, server_id, last_renewed, expires_at)
-	  		VALUES (?, ?, ?, ?)
-	  	IF NOT EXISTS;`
-	applied, err := session.Query(acquireCQL, userID, serverID, now, expires).MapScanCAS(make(map[string]interface{}))
+        INSERT INTO user_locks (user_id, server_id, last_renewed, expires_at)
+        VALUES (?, ?, ?, ?)
+        IF NOT EXISTS;`
+	applied, err := session.Query(acquireCQL, userID, serverID, now, expires).
+		MapScanCAS(make(map[string]interface{}))
 	if err != nil {
-		return false, time.Time{}, errors.Join(err, errors.New("failed to acquire lock"))
+		return false, time.Time{}, fmt.Errorf("failed to acquire lock: %w", err)
 	}
 	if applied {
-		expires := time.Now().Add(time.Duration(leaseMillis) * time.Millisecond)
 		return true, expires, nil
 	}
 
-	// Try RENEW
+	// 2) RENEW: update only if the current lock belongs to this server
 	const renewCQL = `
-	  	UPDATE user_locks SET last_renewed = ?, expires_at  = ?
-	  	WHERE user_id = ? IF server_id = ?;`
-	applied, err = session.Query(renewCQL, now, expires, userID, serverID).MapScanCAS(make(map[string]interface{}))
-
+        UPDATE user_locks
+        SET last_renewed = ?, expires_at = ?
+        WHERE user_id = ?
+        IF server_id = ?;`
+	applied, err = session.Query(renewCQL, now, expires, userID, serverID).
+		MapScanCAS(make(map[string]interface{}))
 	if err != nil {
-		return false, time.Time{}, errors.Join(err, errors.New("failed to renew lock"))
+		return false, time.Time{}, fmt.Errorf("failed to renew lock: %w", err)
 	}
 	if applied {
-		expires := time.Now().Add(time.Duration(leaseMillis) * time.Millisecond)
 		return true, expires, nil
 	}
 
-	// not applied → someone else holds the lock
+	// 3) TAKEOVER: overwrite only if the existing lock has already expired
+	const takeoverCQL = `
+        UPDATE user_locks
+        SET server_id = ?, last_renewed = ?, expires_at = ?
+        WHERE user_id = ?
+        IF expires_at < ?;`
+	applied, err = session.Query(takeoverCQL, serverID, now, expires, userID, now).
+		MapScanCAS(make(map[string]interface{}))
+	if err != nil {
+		return false, time.Time{}, fmt.Errorf("failed to takeover expired lock: %w", err)
+	}
+	if applied {
+		return true, expires, nil
+	}
+
+	// 4) not applied -> another server holds an unexpired lock
 	return false, time.Time{}, nil
 }
 
