@@ -67,23 +67,23 @@ pipeline {
                 }
             }
         }
-//         stage('Update Deployment') {
-//             steps {
-//                 container('jenkins-agent') {
-//                     updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'TODO')
-//                 }
-//             }
-//         }
-//         stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
-//             when {
-//                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
-//             }
-//             steps {
-//                 container('jenkins-agent') {
-//                     createPR('Trove', 'Realm-Deployment', 'dev', 'main')
-//                 }
-//             }
-//         }
+        stage('Update Deployment') {
+            steps {
+                container('jenkins-agent') {
+                    updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'trove.server.tag')
+                }
+            }
+        }
+        stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
+            when {
+                expression { return env.RUN_MAIN_DEPLOY == 'true' }
+            }
+            steps {
+                container('jenkins-agent') {
+                    createPR('Trove', 'Realm-Deployment', 'dev', 'main')
+                }
+            }
+        }
     }
 
     post {
