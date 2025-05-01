@@ -7,12 +7,7 @@ plugins {
 }
 
 group = "com.runicrealms.trove"
-version = "0.0.7-SNAPSHOT"
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
+version = "0.0.8-SNAPSHOT"
 
 repositories {
     mavenCentral()
