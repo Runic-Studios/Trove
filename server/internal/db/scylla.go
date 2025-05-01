@@ -188,7 +188,7 @@ func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int6
 	const renewCQL = `
 	  	UPDATE user_locks SET last_renewed = ?, expires_at  = ?
 	  	WHERE user_id = ? IF server_id = ?;`
-	applied, err = session.Query(renewCQL, now, expires, userID, serverID).ScanCAS(nil, nil, nil, nil)
+	applied, err = session.Query(renewCQL, now, expires, userID, serverID).ScanCAS(nil, nil)
 
 	if err != nil {
 		return false, time.Time{}, err
