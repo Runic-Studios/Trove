@@ -166,14 +166,17 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 // ClaimLock tries to INSERT or RENEW a lock for the given player.
 // Returns (acquiredOrRenewed, expiresAt, error).
 func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int64) (bool, time.Time, error) {
+	now := time.Now()
+	expires := now.Add(time.Duration(leaseMillis) * time.Millisecond)
+
 	// Try ACQUIRE
-	acquireCQL := `
+	const acquireCQL = `
 		INSERT INTO user_locks
-		  (user_id, server_id, last_renewed, expires_at)
-		VALUES (?, ?, toTimestamp(now()), toTimestamp(now() + ?))
-		IF NOT EXISTS;
-	`
-	applied, err := session.Query(acquireCQL, userID, serverID, leaseMillis).ScanCAS()
+			(user_id, server_id, last_renewed, expires_at)
+	  		VALUES (?, ?, ?, ?)
+	  	IF NOT EXISTS;`
+	applied, err := session.Query(acquireCQL, userID, serverID, now, expires).
+		ScanCAS()
 	if err != nil {
 		return false, time.Time{}, err
 	}
@@ -183,14 +186,11 @@ func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int6
 	}
 
 	// Try RENEW
-	renewCQL := `
-		UPDATE user_locks
-		SET last_renewed = toTimestamp(now()),
-		    expires_at   = toTimestamp(now() + ?)
-		WHERE user_id = ?
-		IF server_id = ?;
-	`
-	applied, err = session.Query(renewCQL, leaseMillis, userID, serverID).ScanCAS()
+	const renewCQL = `
+	  	UPDATE user_locks SET last_renewed = ?, expires_at  = ?
+	  	WHERE user_id = ? IF server_id = ?;`
+	applied, err = session.Query(renewCQL, now, expires, userID, serverID).ScanCAS()
+
 	if err != nil {
 		return false, time.Time{}, err
 	}
