@@ -57,7 +57,7 @@ class UserPlayerData internal constructor(
                 ExistsRequest.newBuilder()
                 .setTable(PlayerColumn.Companion.TABLE_NAME)
                 .setLock(potential.lock)
-                .putAllKeys(potential.superKeys)
+                .putAllSuperKeys(potential.superKeys)
                 .build())
 
             if (!response.success) {

@@ -60,7 +60,7 @@ class UserCharacterData internal constructor(
                 ExistsRequest.newBuilder()
                 .setTable(CharacterColumn.Companion.TABLE_NAME)
                 .setLock(potential.lock)
-                .putAllKeys(potential.superKeys)
+                .putAllSuperKeys(potential.superKeys)
                 .build())
 
             if (!response.success) {

@@ -243,3 +243,37 @@ func (s *TroveServer) Load(
 		ColumnData: data,
 	}, nil
 }
+
+// Exists checks if a row exists in a given table that contains the requested super keys
+// Used when a user first logs in to check if they have data already, or if we need to populate it
+func (s *TroveServer) Exists(
+	_ context.Context,
+	req *trove.ExistsRequest,
+) (*trove.ExistsResponse, error) {
+	// enforce lock
+	if req.GetLock() == nil {
+		return &trove.ExistsResponse{Success: false, ErrorMessage: "lock info missing"}, nil
+	}
+	if err := s.validateLock(
+		req.GetLock().GetUserId(),
+		req.GetLock().GetServerId(),
+	); err != nil {
+		return &trove.ExistsResponse{Success: false, ErrorMessage: err.Error()}, nil
+	}
+
+	table := req.GetTable()
+	superKeys := req.GetSuperKeys()
+
+	exists, err := db.Exists(s.session, table, superKeys)
+	if err != nil {
+		return &trove.ExistsResponse{
+			Success:      false,
+			ErrorMessage: fmt.Sprintf("failed to check if row exists: %v", err),
+		}, nil
+	}
+
+	return &trove.ExistsResponse{
+		Success: true,
+		Exists:  exists,
+	}, nil
+}

@@ -248,3 +248,32 @@ func GetLockStatus(session *gocql.Session, userID gocql.UUID) (bool, string, tim
 
 	return true, sid, expiresAt, nil
 }
+
+// Exists returns true if table contains at least one row where
+// each key in superKeys equals its corresponding value
+func Exists(session *gocql.Session, table string, superKeys map[string]string) (bool, error) {
+	var preds []string
+	var args []interface{}
+	for col, val := range superKeys {
+		preds = append(preds, fmt.Sprintf("%s = ?", col))
+		args = append(args, val)
+	}
+	where := strings.Join(preds, " AND ")
+
+	// Query for any matching row
+	cql := fmt.Sprintf(
+		"SELECT * FROM %s WHERE %s LIMIT 1;",
+		table, where,
+	)
+	iter := session.Query(cql, args...).Iter()
+
+	// Try to map one row into a dummy map
+	if iter.MapScan(make(map[string]interface{})) {
+		return true, nil
+	}
+
+	if err := iter.Close(); err != nil {
+		return false, err
+	}
+	return false, nil
+}
