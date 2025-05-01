@@ -69,7 +69,7 @@ pipeline {
         }
         stage('Update Deployment') {
             steps {
-                container('jenkins-agent') {
+                container('agent-go-protoc') {
                     updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'trove.server.tag')
                 }
             }
@@ -79,7 +79,7 @@ pipeline {
                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
             }
             steps {
-                container('jenkins-agent') {
+                container('agent-go-protoc') {
                     createPR('Trove', 'Realm-Deployment', 'dev', 'main')
                 }
             }
