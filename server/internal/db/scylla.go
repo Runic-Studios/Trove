@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,10 +24,16 @@ func NewSession() (*gocql.Session, error) {
 		keyspace = "trove"
 		fmt.Printf("Warning: SCYLLA_KEYSPACE environment variable not set, defaulting to %s\n", keyspace)
 	}
+	port, err := strconv.Atoi(os.Getenv("SCYLLA_PORT"))
+	if err != nil || port <= 0 {
+		port = 9042
+		fmt.Printf("Warning: SCYLLA_PORT environment variable not set, defaulting to %s\n", port)
+	}
 
 	cluster := gocql.NewCluster(hosts)
 	cluster.Keyspace = keyspace
 	cluster.Consistency = gocql.Quorum
+	cluster.Port = port
 	return cluster.CreateSession()
 }
 
