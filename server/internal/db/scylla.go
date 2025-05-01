@@ -175,9 +175,9 @@ func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int6
 			(user_id, server_id, last_renewed, expires_at)
 	  		VALUES (?, ?, ?, ?)
 	  	IF NOT EXISTS;`
-	applied, err := session.Query(acquireCQL, userID, serverID, now, expires).ScanCAS(nil, nil, nil, nil)
+	applied, err := session.Query(acquireCQL, userID, serverID, now, expires).MapScanCAS(make(map[string]interface{}))
 	if err != nil {
-		return false, time.Time{}, err
+		return false, time.Time{}, errors.Join(err, errors.New("failed to acquire lock"))
 	}
 	if applied {
 		expires := time.Now().Add(time.Duration(leaseMillis) * time.Millisecond)
@@ -188,10 +188,10 @@ func ClaimLock(session *gocql.Session, userID, serverID string, leaseMillis int6
 	const renewCQL = `
 	  	UPDATE user_locks SET last_renewed = ?, expires_at  = ?
 	  	WHERE user_id = ? IF server_id = ?;`
-	applied, err = session.Query(renewCQL, now, expires, userID, serverID).ScanCAS(nil, nil)
+	applied, err = session.Query(renewCQL, now, expires, userID, serverID).MapScanCAS(make(map[string]interface{}))
 
 	if err != nil {
-		return false, time.Time{}, err
+		return false, time.Time{}, errors.Join(err, errors.New("failed to renew lock"))
 	}
 	if applied {
 		expires := time.Now().Add(time.Duration(leaseMillis) * time.Millisecond)
@@ -209,7 +209,7 @@ func ReleaseLock(session *gocql.Session, userID, serverID string) (bool, error) 
 		WHERE user_id = ?
 		IF server_id = ?;
 	`
-	applied, err := session.Query(deleteCQL, userID, serverID).ScanCAS(nil, nil, nil)
+	applied, err := session.Query(deleteCQL, userID, serverID).MapScanCAS(make(map[string]interface{}))
 	return applied, err
 }
 
