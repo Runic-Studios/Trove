@@ -24,7 +24,7 @@ message ItemData {
     ClassType classType = 2;
     ItemRarityType rarity = 3;
     int32 health = 4;
-    repeated ItemStat stats = 5;
+    repeated ItemRolledStat stats = 5;
     repeated ItemGemBonus gemBonuses = 6;
     int32 maxGemSlots = 7;
     repeated ItemPerk perks = 8;
@@ -43,7 +43,7 @@ message ItemData {
 
   message OffhandItemData {
     int32 level = 1;
-    repeated ItemStat stats = 2;
+    repeated ItemRolledStat stats = 2;
     ItemRarityType rarity = 3;
     repeated ItemPerk perks = 4;
   }
@@ -54,7 +54,7 @@ message ItemData {
     ItemRarityType rarity = 3;
     int32 minDamage = 4;
     int32 maxDamage = 5;
-    repeated ItemStat stats = 6;
+    repeated ItemRolledStat stats = 6;
     repeated ItemPerk perks = 7;
     optional string skinID = 8;
   }
@@ -77,15 +77,20 @@ message ItemData {
     WISDOM = 4;
   }
 
-  message ItemStat {
+  message ItemRolledStat {
     ItemStatType type = 1;
     int32 minRange = 2;
     int32 maxRange = 3;
     double rollPercentage = 4;
   }
 
+  message ItemStaticStat {
+    ItemStatType type = 1;
+    int32 amount = 2;
+  }
+
   message ItemGemBonus {
-    repeated ItemStat stats = 1;
+    repeated ItemStaticStat stats = 1;
     int32 health = 2;
     ItemStatType mainStat = 3;
     int32 tier = 4;
