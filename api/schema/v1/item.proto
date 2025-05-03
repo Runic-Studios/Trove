@@ -11,56 +11,55 @@ message ItemData {
   string templateID = 1;
   int32 count = 2;
   map<string, string> data = 3;
-  repeated string lore = 4;
   oneof typeData {
-    Armor armor = 5;
-    Gem gem = 6;
-    Trigger trigger = 7;
-    Offhand offhand = 8;
-    Weapon weapon = 9;
+    ArmorItemData armor = 4;
+    GemItemData gem = 5;
+    TriggerItemData trigger = 6;
+    OffhandItemData offhand = 7;
+    WeaponItemData weapon = 8;
   }
 
-  message Armor {
+  message ArmorItemData {
     int32 level = 1;
     ClassType classType = 2;
-    RarityType rarity = 3;
+    ItemRarityType rarity = 3;
     int32 health = 4;
-    repeated Stat stats = 5;
-    repeated GemBonus gemBonuses = 6;
+    repeated ItemStat stats = 5;
+    repeated ItemGemBonus gemBonuses = 6;
     int32 maxGemSlots = 7;
-    repeated Perk perks = 8;
+    repeated ItemPerk perks = 8;
   }
 
-  message Gem {
-    GemBonus bonus = 1;
+  message GemItemData {
+    ItemGemBonus bonus = 1;
   }
 
-  message Trigger {
+  message TriggerItemData {
     optional string rightClickAction = 1;
     optional string shiftRightClickAction = 2;
     optional string leftClickAction = 3;
     optional string shiftLeftClickAction = 4;
   }
 
-  message Offhand {
+  message OffhandItemData {
     int32 level = 1;
-    repeated Stat stats = 2;
-    RarityType rarity = 3;
-    repeated Perk perks = 4;
+    repeated ItemStat stats = 2;
+    ItemRarityType rarity = 3;
+    repeated ItemPerk perks = 4;
   }
 
-  message Weapon {
+  message WeaponItemData {
     int32 level = 1;
     ClassType class = 2;
-    RarityType rarity = 3;
+    ItemRarityType rarity = 3;
     int32 minDamage = 4;
     int32 maxDamage = 5;
-    repeated Stat stats = 6;
-    repeated Perk perks = 7;
+    repeated ItemStat stats = 6;
+    repeated ItemPerk perks = 7;
     optional string skinID = 8;
   }
 
-  enum RarityType {
+  enum ItemRarityType {
     COMMON = 0;
     UNCOMMON = 1;
     RARE = 2;
@@ -70,7 +69,7 @@ message ItemData {
     CRAFTED = 6;
   }
 
-  enum StatType {
+  enum ItemStatType {
     DEXTERITY = 0;
     INTELLIGENCE = 1;
     STRENGTH = 2;
@@ -78,21 +77,21 @@ message ItemData {
     WISDOM = 4;
   }
 
-  message Stat {
-    StatType type = 1;
+  message ItemStat {
+    ItemStatType type = 1;
     int32 minRange = 2;
     int32 maxRange = 3;
     double rollPercentage = 4;
   }
 
-  message GemBonus {
-    repeated Stat stats = 1;
+  message ItemGemBonus {
+    repeated ItemStat stats = 1;
     int32 health = 2;
-    StatType mainStat = 3;
+    ItemStatType mainStat = 3;
     int32 tier = 4;
   }
 
-  message Perk {
+  message ItemPerk {
     string perkID = 1;
     int32 stacks = 2;
   }
