@@ -47,7 +47,7 @@ message ItemData {
 
   message WeaponData {
     int32 level = 1;
-    ClassType class = 2;
+    ClassType classType = 2;
     RarityType rarity = 3;
     int32 minDamage = 4;
     int32 maxDamage = 5;
