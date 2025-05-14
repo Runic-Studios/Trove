@@ -43,7 +43,7 @@ abstract class UserChangeStager(
         }
     }
 
-    fun stageChanges(column: PlayerColumn) {
+    fun stageChanges(column: UserColumn) {
         column.pendingChanges = column.getRawData()
     }
 

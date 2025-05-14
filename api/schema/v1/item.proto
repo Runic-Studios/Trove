@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "schema/v1/class.proto";
+import "schema/v1/stat.proto";
 
 package schema.v1;
 
@@ -9,76 +10,39 @@ option java_multiple_files = true;
 
 message ItemData {
   string templateID = 1;
-  int32 count = 2;
-  map<string, string> data = 3;
+  map<string, string> customData = 2;
+  int32 count = 3;
   oneof typeData {
     ArmorData armor = 4;
     GemData gem = 5;
-    TriggerData trigger = 6;
-    OffhandData offhand = 7;
-    WeaponData weapon = 8;
+    OffhandData offhand = 6;
+    WeaponData weapon = 7;
   }
 
   message ArmorData {
-    int32 level = 1;
-    ClassType classType = 2;
-    RarityType rarity = 3;
-    int32 health = 4;
-    repeated RolledStat stats = 5;
-    repeated GemBonus gemBonuses = 6;
-    int32 maxGemSlots = 7;
-    repeated Perk perks = 8;
+    repeated RolledStat stats = 1;
+    repeated GemBonus gemBonuses = 2;
+    repeated Perk perks = 3;
   }
 
   message GemData {
     GemBonus bonus = 1;
   }
 
-  message TriggerData {
-    repeated ClickTrigger triggers = 1;
-  }
-
   message OffhandData {
-    int32 level = 1;
-    repeated RolledStat stats = 2;
-    RarityType rarity = 3;
-    repeated Perk perks = 4;
+    repeated RolledStat stats = 1;
+    repeated Perk perks = 2;
   }
 
   message WeaponData {
-    int32 level = 1;
-    ClassType classType = 2;
-    RarityType rarity = 3;
-    int32 minDamage = 4;
-    int32 maxDamage = 5;
-    repeated RolledStat stats = 6;
-    repeated Perk perks = 7;
-    optional string skinID = 8;
-  }
-
-  enum RarityType {
-    COMMON = 0;
-    UNCOMMON = 1;
-    RARE = 2;
-    EPIC = 3;
-    LEGENDARY = 4;
-    UNIQUE = 5;
-    CRAFTED = 6;
-  }
-
-  enum StatType {
-    DEXTERITY = 0;
-    INTELLIGENCE = 1;
-    STRENGTH = 2;
-    VITALITY = 3;
-    WISDOM = 4;
+    repeated RolledStat stats = 1;
+    repeated Perk perks = 2;
+    optional string skinID = 3;
   }
 
   message RolledStat {
     StatType type = 1;
-    int32 minRange = 2;
-    int32 maxRange = 3;
-    double rollPercentage = 4;
+    double rollPercentage = 2;
   }
 
   message StaticStat {
@@ -96,17 +60,5 @@ message ItemData {
   message Perk {
     string perkID = 1;
     int32 stacks = 2;
-  }
-
-  enum ClickTriggerType {
-    RIGHT_CLICK = 0;
-    SHIFT_RIGHT_CLICK = 1;
-    LEFT_CLICK = 2;
-    SHIFT_LEFT_CLICK = 3;
-  }
-
-  message ClickTrigger {
-    ClickTriggerType type = 1;
-    string triggerID = 2;
   }
 }
