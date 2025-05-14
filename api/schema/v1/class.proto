@@ -12,4 +12,5 @@ enum ClassType {
   MAGE = 2;
   ROGUE = 3;
   WARRIOR = 4;
+  ANY = 5;
 }

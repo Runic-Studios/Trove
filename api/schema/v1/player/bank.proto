@@ -12,6 +12,6 @@ message PlayerBankData {
   int32 maxPageIndex = 2;
 
   message BankPage {
-    map<int32, ItemData> items = 1;
+    map<int32, ItemDataStack> items = 1;
   }
 }

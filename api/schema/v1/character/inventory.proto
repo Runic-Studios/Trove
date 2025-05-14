@@ -8,5 +8,5 @@ option java_package = "com.runicrealms.trove.generated.api.schema.v1.character";
 option java_multiple_files = true;
 
 message CharacterInventoryData {
-  map<int32, ItemData> items = 1;
+  map<int32, ItemDataStack> items = 1;
 }

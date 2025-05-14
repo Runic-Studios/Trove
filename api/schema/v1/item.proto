@@ -8,15 +8,19 @@ option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1"
 option java_package = "com.runicrealms.trove.generated.api.schema.v1";
 option java_multiple_files = true;
 
+message ItemDataStack {
+  ItemData data = 1;
+  int32 count = 2;
+}
+
 message ItemData {
   string templateID = 1;
   map<string, string> customData = 2;
-  int32 count = 3;
   oneof typeData {
-    ArmorData armor = 4;
-    GemData gem = 5;
-    OffhandData offhand = 6;
-    WeaponData weapon = 7;
+    ArmorData armor = 3;
+    GemData gem = 4;
+    OffhandData offhand = 5;
+    WeaponData weapon = 6;
   }
 
   message ArmorData {
