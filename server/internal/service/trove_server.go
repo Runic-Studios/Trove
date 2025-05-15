@@ -167,7 +167,7 @@ func (s *TroveServer) Save(
 	if err != nil {
 		return &trove.SaveResponse{
 			Success:      false,
-			ErrorMessage: fmt.Sprintf("error saving data: %v", err),
+			ErrorMessage: fmt.Sprintf("error saving data: %+v", err),
 		}, nil
 	}
 
@@ -207,7 +207,7 @@ func (s *TroveServer) Load(
 	if err != nil {
 		return &trove.LoadResponse{
 			Success:      false,
-			ErrorMessage: fmt.Sprintf("error loading data: %v", err),
+			ErrorMessage: fmt.Sprintf("error loading data: %+v", err),
 		}, nil
 	}
 
@@ -220,7 +220,7 @@ func (s *TroveServer) Load(
 			if err != nil {
 				return &trove.LoadResponse{
 					Success:      false,
-					ErrorMessage: fmt.Sprintf("failed to transform column %s: %v", column, err),
+					ErrorMessage: fmt.Sprintf("failed to transform column %s: %+v", column, err),
 				}, nil
 			}
 			up[column] = dataUp
@@ -232,7 +232,7 @@ func (s *TroveServer) Load(
 		if err != nil {
 			return &trove.LoadResponse{
 				Success:      false,
-				ErrorMessage: fmt.Sprintf("failed to save transformed data: %v", err),
+				ErrorMessage: fmt.Sprintf("failed to save transformed data: %+v", err),
 			}, nil
 		}
 		data = up
@@ -268,7 +268,7 @@ func (s *TroveServer) Exists(
 	if err != nil {
 		return &trove.ExistsResponse{
 			Success:      false,
-			ErrorMessage: fmt.Sprintf("failed to check if row exists: %v", err),
+			ErrorMessage: fmt.Sprintf("failed to check if row exists: %+v", err),
 		}, nil
 	}
 

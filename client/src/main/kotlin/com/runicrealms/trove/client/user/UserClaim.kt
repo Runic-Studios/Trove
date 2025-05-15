@@ -37,7 +37,7 @@ class UserClaim internal constructor(
     }
 
     suspend fun loadCharacter(slot: Int): Result<UserCharacterData> {
-        return UserCharacterData.load(UserCharacterData.Potential(user, slot, stub, lock))
+        return UserCharacterData.loadOrCreate(UserCharacterData.Potential(user, slot, stub, lock))
     }
 
     suspend fun releaseAndClose(): Result<Unit> {
