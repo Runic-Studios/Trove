@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Runic-Studios/Trove/server/internal/db"
+	"log"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -70,6 +72,7 @@ func (s *TroveServer) ClaimLock(
 	// Try to acquire or renew
 	acquiredOrRenewed, _, err := db.ClaimLock(s.session, userId, sid, leaseMillis)
 	if err != nil {
+		log.Printf("internal error claiming lock: %v\n%s", err, debug.Stack())
 		return &trove.ClaimLockResponse{Success: false, ErrorMessage: err.Error()}, nil
 	} else if acquiredOrRenewed {
 		expires := time.Now().Add(time.Duration(leaseMillis) * time.Millisecond)
@@ -103,6 +106,7 @@ func (s *TroveServer) ReleaseLock(
 
 	applied, err := db.ReleaseLock(s.session, userId, sid)
 	if err != nil {
+		log.Printf("internal error releasing lock: %v\n%s", err, debug.Stack())
 		return &trove.ReleaseLockResponse{Success: false, ErrorMessage: err.Error()}, nil
 	} else if applied {
 		s.locks.Delete(userId)
@@ -145,6 +149,7 @@ func (s *TroveServer) Save(
 		req.GetLock().GetUserId(),
 		req.GetLock().GetServerId(),
 	); err != nil {
+		log.Printf("internal error saving: %v\n%s", err, debug.Stack())
 		return &trove.SaveResponse{Success: false, ErrorMessage: err.Error()}, nil
 	}
 
@@ -165,6 +170,7 @@ func (s *TroveServer) Save(
 
 	err := db.SaveData(s.session, table, superKeys, data, latest)
 	if err != nil {
+		log.Printf("internal error saving: %v\n%s", err, debug.Stack())
 		return &trove.SaveResponse{
 			Success:      false,
 			ErrorMessage: fmt.Sprintf("error saving data: %+v", err),
@@ -188,6 +194,7 @@ func (s *TroveServer) Load(
 		req.GetLock().GetUserId(),
 		req.GetLock().GetServerId(),
 	); err != nil {
+		log.Printf("internal error loading: %v\n%s", err, debug.Stack())
 		return &trove.LoadResponse{Success: false, ErrorMessage: err.Error()}, nil
 	}
 
@@ -205,6 +212,7 @@ func (s *TroveServer) Load(
 
 	data, version, err := db.LoadData(s.session, table, superKeys, columns)
 	if err != nil {
+		log.Printf("internal error loading: %v\n%s", err, debug.Stack())
 		return &trove.LoadResponse{
 			Success:      false,
 			ErrorMessage: fmt.Sprintf("error loading data: %+v", err),
@@ -218,6 +226,7 @@ func (s *TroveServer) Load(
 		for column, datum := range data {
 			dataUp, err := s.transformers.TransformUp(table, column, version, datum)
 			if err != nil {
+				log.Printf("internal error loading (transform column): %v\n%s", err, debug.Stack())
 				return &trove.LoadResponse{
 					Success:      false,
 					ErrorMessage: fmt.Sprintf("failed to transform column %s: %+v", column, err),
@@ -230,6 +239,7 @@ func (s *TroveServer) Load(
 		// trigger a save
 		err := db.SaveData(s.session, table, superKeys, up, version)
 		if err != nil {
+			log.Printf("internal error loading (transform save): %v\n%s", err, debug.Stack())
 			return &trove.LoadResponse{
 				Success:      false,
 				ErrorMessage: fmt.Sprintf("failed to save transformed data: %+v", err),
@@ -266,6 +276,7 @@ func (s *TroveServer) Exists(
 
 	exists, err := db.Exists(s.session, table, superKeys)
 	if err != nil {
+		log.Printf("internal error check exists: %v\n%s", err, debug.Stack())
 		return &trove.ExistsResponse{
 			Success:      false,
 			ErrorMessage: fmt.Sprintf("failed to check if row exists: %+v", err),

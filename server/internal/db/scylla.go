@@ -3,8 +3,10 @@ package db
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -101,7 +103,12 @@ func SaveData(session *gocql.Session, table string, superkeys map[string]string,
 	allArgs := append(setVals, version)
 	allArgs = append(allArgs, whereVals...)
 
-	return session.Query(queryStr, allArgs...).Exec()
+	err := session.Query(queryStr, allArgs...).Exec()
+
+	if err != nil {
+		log.Printf("db internal error saving when executing %s\n%v\n%s", queryStr, err, debug.Stack())
+	}
+	return err
 }
 
 func LoadData(session *gocql.Session, table string, superkeys map[string]string, columns []string) (map[string][]byte, string, error) {
@@ -151,6 +158,7 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 	values = append(values, &schemaVersion)
 
 	if err := session.Query(queryStr, whereVals...).Scan(values...); err != nil {
+		log.Printf("db internal error loading when executing %s\n%v\n%s", queryStr, err, debug.Stack())
 		return nil, "", err
 	}
 
