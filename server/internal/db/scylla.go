@@ -111,22 +111,27 @@ func SaveData(session *gocql.Session, table string, superkeys map[string]string,
 	return err
 }
 
-func LoadData(session *gocql.Session, table string, superkeys map[string]string, columns []string) (map[string][]byte, string, error) {
+type Row struct {
+	Data          map[string][]byte
+	SchemaVersion string
+}
+
+func LoadData(session *gocql.Session, table string, superkeys map[string]string, columns []string) ([]Row, error) {
 	if !isSafeIdentifier(table) {
-		return nil, "", fmt.Errorf("invalid table name: %s", table)
+		return nil, fmt.Errorf("invalid table name: %s", table)
 	}
 
 	if len(superkeys) == 0 {
-		return nil, "", errors.New("must specify at least one superkey")
+		return nil, errors.New("must specify at least one superkey")
 	}
 
 	if len(columns) == 0 {
-		return nil, "", errors.New("must specify at least one column to select")
+		return nil, errors.New("must specify at least one column to select")
 	}
 
 	for _, col := range columns {
 		if !isSafeIdentifier(col) {
-			return nil, "", fmt.Errorf("invalid column name: %s", col)
+			return nil, fmt.Errorf("invalid column name: %s", col)
 		}
 	}
 
@@ -134,7 +139,7 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 	whereVals := make([]interface{}, 0, len(superkeys))
 	for key, val := range superkeys {
 		if !isSafeIdentifier(key) {
-			return nil, "", fmt.Errorf("invalid superkey name: %s", key)
+			return nil, fmt.Errorf("invalid superkey name: %s", key)
 		}
 		whereKeys = append(whereKeys, key+" = ?")
 		whereVals = append(whereVals, val)
@@ -142,31 +147,40 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 	whereClause := strings.Join(whereKeys, " AND ")
 
 	selectClause := strings.Join(columns, ", ") + ", schema_version"
-	queryStr := fmt.Sprintf("SELECT %s FROM %s WHERE %s LIMIT 1", selectClause, table, whereClause)
+	queryStr := fmt.Sprintf("SELECT %s FROM %s WHERE %s", selectClause, table, whereClause)
 
-	// Prepare holders for values
-	values := make([]interface{}, len(columns))
-	columnData := make(map[string][]byte, len(columns))
+	iter := session.Query(queryStr, whereVals...).Iter()
 
-	for i := range columns {
-		var b []byte
-		values[i] = &b
-		columnData[columns[i]] = b
+	var results []Row
+	for {
+		// allocate holders
+		holders := make([]interface{}, len(columns)+1)
+		for i := range columns {
+			holders[i] = new([]byte)
+		}
+		holders[len(columns)] = new(string)
+
+		// try to scan one row
+		if !iter.Scan(holders...) {
+			break
+		}
+
+		// build Row from holders
+		data := make(map[string][]byte, len(columns))
+		for i, col := range columns {
+			data[col] = *holders[i].(*[]byte)
+		}
+		version := *holders[len(columns)].(*string)
+
+		results = append(results, Row{Data: data, SchemaVersion: version})
 	}
 
-	var schemaVersion string
-	values = append(values, &schemaVersion)
-
-	if err := session.Query(queryStr, whereVals...).Scan(values...); err != nil {
+	if err := iter.Close(); err != nil {
 		log.Printf("db internal error loading when executing %s\n%v\n%s", queryStr, err, debug.Stack())
-		return nil, "", err
+		return nil, err
 	}
 
-	for i, col := range columns {
-		columnData[col] = *(values[i].(*[]byte))
-	}
-
-	return columnData, schemaVersion, nil
+	return results, nil
 }
 
 // === LOCK MANAGEMENT ===

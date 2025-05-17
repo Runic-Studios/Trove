@@ -86,34 +86,42 @@ class UserCharacterData internal constructor(
                 ))
                 .build()
             )
-            if (!response.success || response.columnDataMap == null || response.columnDataCount == 0) {
+            if (response.rowsCount > 1) {
+                return Result.failure(IllegalStateException("Too many matching rows for character found, expected 1"))
+            }
+            if (response.rowsCount == 0) {
+                return Result.failure(IllegalStateException("Could not find rows for character"))
+            }
+            val columnData = response.rowsList[0]!!.columnDataMap
+
+            if (!response.success) {
                 return Result.failure(IllegalStateException(response.errorMessage))
             }
             val userCharacterData = UserCharacterData(
                 potential,
                 false,
                 CharacterInventory(
-                    CharacterInventoryData.parseFrom(response.columnDataMap[CharacterInventory.Companion.COLUMN_NAME])
+                    CharacterInventoryData.parseFrom(columnData[CharacterInventory.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 CharacterProfession(
-                    CharacterProfessionData.parseFrom(response.columnDataMap[CharacterProfession.Companion.COLUMN_NAME])
+                    CharacterProfessionData.parseFrom(columnData[CharacterProfession.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 CharacterQuests(
-                    CharacterQuestsData.parseFrom(response.columnDataMap[CharacterQuests.Companion.COLUMN_NAME])
+                    CharacterQuestsData.parseFrom(columnData[CharacterQuests.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 CharacterSkills(
-                    CharacterSkillsData.parseFrom(response.columnDataMap[CharacterSkills.Companion.COLUMN_NAME])
+                    CharacterSkillsData.parseFrom(columnData[CharacterSkills.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 CharacterSpells(
-                    CharacterSpellsData.parseFrom(response.columnDataMap[CharacterSpells.Companion.COLUMN_NAME])
+                    CharacterSpellsData.parseFrom(columnData[CharacterSpells.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 CharacterTraits(
-                    CharacterTraitsData.parseFrom(response.columnDataMap[CharacterTraits.Companion.COLUMN_NAME])
+                    CharacterTraitsData.parseFrom(columnData[CharacterTraits.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 )

@@ -210,7 +210,7 @@ func (s *TroveServer) Load(
 		}, nil
 	}
 
-	data, version, err := db.LoadData(s.session, table, superKeys, columns)
+	rows, err := db.LoadData(s.session, table, superKeys, columns)
 	if err != nil {
 		log.Printf("internal error loading: %v\n%s", err, debug.Stack())
 		return &trove.LoadResponse{
@@ -219,38 +219,47 @@ func (s *TroveServer) Load(
 		}, nil
 	}
 
-	// transform if we have a chain for this table.column
-	latest := s.transformers.LatestVersion
-	if version != latest {
-		up := make(map[string][]byte, len(data))
-		for column, datum := range data {
-			dataUp, err := s.transformers.TransformUp(table, column, version, datum)
+	rowResponse := make([]*trove.LoadResponse_Row, len(rows))
+
+	for i, row := range rows {
+		version := row.SchemaVersion
+		data := row.Data
+		// transform if we have a chain for this table.column
+		latest := s.transformers.LatestVersion
+		if version != latest {
+			up := make(map[string][]byte, len(data))
+			for column, datum := range data {
+				dataUp, err := s.transformers.TransformUp(table, column, version, datum)
+				if err != nil {
+					log.Printf("internal error loading (transform column): %v\n%s", err, debug.Stack())
+					return &trove.LoadResponse{
+						Success:      false,
+						ErrorMessage: fmt.Sprintf("failed to transform column %s: %+v", column, err),
+					}, nil
+				}
+				up[column] = dataUp
+			}
+			version = latest
+
+			// trigger a save
+			err := db.SaveData(s.session, table, superKeys, up, version)
 			if err != nil {
-				log.Printf("internal error loading (transform column): %v\n%s", err, debug.Stack())
+				log.Printf("internal error loading (transform save): %v\n%s", err, debug.Stack())
 				return &trove.LoadResponse{
 					Success:      false,
-					ErrorMessage: fmt.Sprintf("failed to transform column %s: %+v", column, err),
+					ErrorMessage: fmt.Sprintf("failed to save transformed data: %+v", err),
 				}, nil
 			}
-			up[column] = dataUp
+			data = up
 		}
-		version = latest
-
-		// trigger a save
-		err := db.SaveData(s.session, table, superKeys, up, version)
-		if err != nil {
-			log.Printf("internal error loading (transform save): %v\n%s", err, debug.Stack())
-			return &trove.LoadResponse{
-				Success:      false,
-				ErrorMessage: fmt.Sprintf("failed to save transformed data: %+v", err),
-			}, nil
+		rowResponse[i] = &trove.LoadResponse_Row{
+			ColumnData: data,
 		}
-		data = up
 	}
 
 	return &trove.LoadResponse{
-		Success:    true,
-		ColumnData: data,
+		Success: true,
+		Rows:    rowResponse,
 	}, nil
 }
 

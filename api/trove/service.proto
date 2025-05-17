@@ -61,7 +61,10 @@ message LoadRequest {
 message LoadResponse {
   bool success = 1;
   string error_message = 2;
-  map<string, bytes> column_data = 3; // Column -> data loaded
+  repeated Row rows = 3; // Column -> data loaded
+  message Row {
+    map<string, bytes> column_data = 1;
+  }
 }
 
 message ExistsRequest {

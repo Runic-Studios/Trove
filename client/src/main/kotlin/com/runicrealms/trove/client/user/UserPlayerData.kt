@@ -85,32 +85,39 @@ class UserPlayerData internal constructor(
                     )
                     .build()
             )
-            if (!response.success || response.columnDataMap == null || response.columnDataCount == 0) {
+            if (response.rowsCount > 1) {
+                return Result.failure(IllegalStateException("Too many matching rows for player found, expected 1"))
+            }
+            if (response.rowsCount == 0) {
+                return Result.failure(IllegalStateException("Could not find rows for player"))
+            }
+            val columnData = response.rowsList[0]!!.columnDataMap
+            if (!response.success) {
                 return Result.failure(IllegalStateException(response.errorMessage))
             }
             val userPlayerData = UserPlayerData(
                 potential,
                 false,
                 PlayerAchievements(
-                    PlayerAchievementsData.parseFrom(response.columnDataMap[PlayerAchievements.Companion.COLUMN_NAME])
+                    PlayerAchievementsData.parseFrom(columnData[PlayerAchievements.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 PlayerBank(
-                    PlayerBankData.parseFrom(response.columnDataMap[PlayerBank.Companion.COLUMN_NAME]).toBuilder()
+                    PlayerBankData.parseFrom(columnData[PlayerBank.Companion.COLUMN_NAME]).toBuilder()
                 ),
                 PlayerGathering(
-                    PlayerGatheringData.parseFrom(response.columnDataMap[PlayerGathering.Companion.COLUMN_NAME])
+                    PlayerGatheringData.parseFrom(columnData[PlayerGathering.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 PlayerMounts(
-                    PlayerMountsData.parseFrom(response.columnDataMap[PlayerMounts.Companion.COLUMN_NAME]).toBuilder()
+                    PlayerMountsData.parseFrom(columnData[PlayerMounts.Companion.COLUMN_NAME]).toBuilder()
                 ),
                 PlayerSettings(
-                    PlayerSettingsData.parseFrom(response.columnDataMap[PlayerSettings.Companion.COLUMN_NAME])
+                    PlayerSettingsData.parseFrom(columnData[PlayerSettings.Companion.COLUMN_NAME])
                         .toBuilder()
                 ),
                 PlayerTraits(
-                    PlayerTraitsData.parseFrom(response.columnDataMap[PlayerTraits.Companion.COLUMN_NAME]).toBuilder()
+                    PlayerTraitsData.parseFrom(columnData[PlayerTraits.Companion.COLUMN_NAME]).toBuilder()
                 )
             )
             return Result.success(userPlayerData)

@@ -40,6 +40,10 @@ class UserClaim internal constructor(
         return UserCharacterData.loadOrCreate(UserCharacterData.Potential(user, slot, stub, lock))
     }
 
+    suspend fun loadCharactersTraits(): Result<UserCharactersTraits> {
+        return UserCharactersTraits.load(UserCharactersTraits.Potential(user, stub, lock))
+    }
+
     suspend fun releaseAndClose(): Result<Unit> {
         val response = stub.releaseLock(
             ReleaseLockRequest.newBuilder()
