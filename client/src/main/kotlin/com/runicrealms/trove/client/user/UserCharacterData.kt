@@ -41,6 +41,7 @@ class UserCharacterData internal constructor(
         add(spells)
         add(traits)
     },
+    CharacterColumn.Companion.TABLE_NAME
 ) {
 
     val slot = potential.slot

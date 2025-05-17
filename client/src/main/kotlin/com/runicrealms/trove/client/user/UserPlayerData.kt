@@ -41,6 +41,7 @@ class UserPlayerData internal constructor(
         add(settings)
         add(traits)
     },
+    PlayerColumn.Companion.TABLE_NAME
 ) {
 
     internal data class Potential(

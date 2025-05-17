@@ -1,6 +1,5 @@
 package com.runicrealms.trove.client.user
 
-import com.runicrealms.trove.client.user.player.PlayerColumn
 import com.runicrealms.trove.generated.api.trove.LockInfo
 import com.runicrealms.trove.generated.api.trove.SaveRequest
 import com.runicrealms.trove.generated.api.trove.TroveServiceGrpcKt
@@ -11,7 +10,8 @@ abstract class UserChangeStager(
     private val stub: TroveServiceGrpcKt.TroveServiceCoroutineStub,
     private val lock: LockInfo,
     protected val superKeys: Map<String, String>,
-    protected val columns: Collection<UserColumn>
+    protected val columns: Collection<UserColumn>,
+    protected val table: String
 ) {
 
     private val stageMutex = Mutex()
@@ -19,7 +19,7 @@ abstract class UserChangeStager(
     suspend fun save(): Result<Unit> {
         stageMutex.withLock {
             val request = SaveRequest.newBuilder()
-                .setTable(PlayerColumn.TABLE_NAME)
+                .setTable(table)
                 .setLock(lock)
                 .putAllSuperKeys(superKeys)
             for (column in columns) {
