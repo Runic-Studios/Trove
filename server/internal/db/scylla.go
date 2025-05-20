@@ -156,7 +156,7 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 		// allocate holders
 		holders := make([]interface{}, len(columns)+1)
 		for i := range columns {
-			holders[i] = new([]byte)
+			holders[i] = new(*interface{})
 		}
 		holders[len(columns)] = new(string)
 
@@ -168,7 +168,8 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 		// build Row from holders
 		data := make(map[string][]byte, len(columns))
 		for i, col := range columns {
-			data[col] = *holders[i].(*[]byte)
+			raw := *(holders[i].(*interface{}))
+			data[col] = toByteArray(raw)
 		}
 		version := *holders[len(columns)].(*string)
 
@@ -181,6 +182,25 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 	}
 
 	return results, nil
+}
+
+func toByteArray(val interface{}) []byte {
+	switch v := val.(type) {
+	case []byte:
+		return v
+	case string:
+		return []byte(v)
+	case int:
+		return []byte(strconv.Itoa(v))
+	case int64:
+		return []byte(strconv.FormatInt(v, 10))
+	case float64:
+		return []byte(strconv.FormatFloat(v, 'f', -1, 64))
+	case bool:
+		return []byte(strconv.FormatBool(v))
+	default:
+		return []byte(fmt.Sprintf("%v", v))
+	}
 }
 
 // === LOCK MANAGEMENT ===

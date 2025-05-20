@@ -39,6 +39,9 @@ class UserCharactersTraits(
                     )
                     .build()
             )
+            if (!response.success) {
+                return Result.failure(IllegalStateException(response.errorMessage))
+            }
             val characters = mutableMapOf<Int, CharacterTraits>()
             for (row in response.rowsList) {
                 val rawSlot = row.columnDataMap["slot"]
