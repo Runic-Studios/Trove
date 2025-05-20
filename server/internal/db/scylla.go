@@ -1,9 +1,11 @@
 package db
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"regexp"
 	"runtime/debug"
@@ -209,17 +211,61 @@ func toByteArray(val interface{}) []byte {
 		return v
 	case string:
 		return []byte(v)
+
 	case int:
-		return []byte(strconv.Itoa(v))
+		// assume 32-bit int; adjust size if we really need a 64-bit representation
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		return buf
+
 	case int32:
-		return []byte(strconv.FormatInt(int64(v), 10))
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, uint32(v))
+		return buf
+
 	case int64:
-		return []byte(strconv.FormatInt(v, 10))
+		buf := make([]byte, 8)
+		binary.BigEndian.PutUint64(buf, uint64(v))
+		return buf
+
+	case uint8:
+		return []byte{v}
+
+	case uint16:
+		buf := make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, v)
+		return buf
+
+	case uint32:
+		buf := make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, v)
+		return buf
+
+	case uint64:
+		buf := make([]byte, 8)
+		binary.BigEndian.PutUint64(buf, v)
+		return buf
+
+	case float32:
+		buf := make([]byte, 4)
+		bits := math.Float32bits(v)
+		binary.BigEndian.PutUint32(buf, bits)
+		return buf
+
 	case float64:
-		return []byte(strconv.FormatFloat(v, 'f', -1, 64))
+		buf := make([]byte, 8)
+		bits := math.Float64bits(v)
+		binary.BigEndian.PutUint64(buf, bits)
+		return buf
+
 	case bool:
-		return []byte(strconv.FormatBool(v))
+		if v {
+			return []byte{1}
+		}
+		return []byte{0}
+
 	default:
+		// last resort: human‐readable fallback
 		return []byte(fmt.Sprintf("%v", v))
 	}
 }
