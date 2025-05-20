@@ -151,12 +151,23 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 
 	iter := session.Query(queryStr, whereVals...).Iter()
 
+	colInfos := iter.Columns()
+
 	var results []Row
 	for {
 		// allocate holders
-		holders := make([]interface{}, len(columns)+1)
-		for i := range columns {
-			holders[i] = new(*interface{})
+		holders := make([]interface{}, len(colInfos))
+		for i, ci := range colInfos {
+			switch {
+			case ci.Name == "schema_version":
+				holders[i] = new(string)
+			case ci.TypeInfo.Type() == gocql.TypeBlob:
+				holders[i] = new([]byte)
+			case ci.TypeInfo.Type() == gocql.TypeInt:
+				holders[i] = new(int32)
+			default:
+				holders[i] = new(interface{})
+			}
 		}
 		holders[len(columns)] = new(string)
 
@@ -167,12 +178,15 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 
 		// build Row from holders
 		data := make(map[string][]byte, len(columns))
-		for i, col := range columns {
-			raw := *(holders[i].(*interface{}))
-			data[col] = toByteArray(raw)
+		var version string
+		for i, ci := range colInfos {
+			name := ci.Name
+			if name == "schema_version" {
+				version = *(holders[i].(*string))
+			} else {
+				data[name] = toByteArray(*(holders[i].(*interface{})))
+			}
 		}
-		version := *holders[len(columns)].(*string)
-
 		results = append(results, Row{Data: data, SchemaVersion: version})
 	}
 
@@ -192,6 +206,8 @@ func toByteArray(val interface{}) []byte {
 		return []byte(v)
 	case int:
 		return []byte(strconv.Itoa(v))
+	case int32:
+		return []byte(strconv.FormatInt(int64(v), 10))
 	case int64:
 		return []byte(strconv.FormatInt(v, 10))
 	case float64:
