@@ -6,6 +6,8 @@ import com.runicrealms.trove.generated.api.schema.v1.character.CharacterTraitsDa
 import com.runicrealms.trove.generated.api.trove.LoadRequest
 import com.runicrealms.trove.generated.api.trove.LockInfo
 import com.runicrealms.trove.generated.api.trove.TroveServiceGrpcKt
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.UUID
 
 /**
@@ -45,8 +47,11 @@ class UserCharactersTraits(
             val characters = mutableMapOf<Int, CharacterTraits>()
             for (row in response.rowsList) {
                 val rawSlot = row.columnDataMap["slot"]
-                val slot = rawSlot.toString().toIntOrNull()
+                val slotBytes = rawSlot?.toByteArray()
                     ?: return Result.failure(IllegalStateException("Couldn't read row with slot $rawSlot"))
+                val padded = ByteArray(4)
+                System.arraycopy(slotBytes, 0, padded, 4 - slotBytes.size, slotBytes.size)
+                val slot = ByteBuffer.wrap(padded).order(ByteOrder.BIG_ENDIAN).int
                 val traits = CharacterTraits(
                     CharacterTraitsData.parseFrom(row.columnDataMap[CharacterTraits.Companion.COLUMN_NAME]).toBuilder()
                 )
