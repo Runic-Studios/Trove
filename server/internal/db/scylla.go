@@ -181,9 +181,14 @@ func LoadData(session *gocql.Session, table string, superkeys map[string]string,
 		var version string
 		for i, ci := range colInfos {
 			name := ci.Name
-			if name == "schema_version" {
+			switch {
+			case name == "schema_version":
 				version = *(holders[i].(*string))
-			} else {
+			case ci.TypeInfo.Type() == gocql.TypeBlob:
+				data[name] = *(holders[i].(*[]byte))
+			case ci.TypeInfo.Type() == gocql.TypeInt:
+				data[name] = toByteArray(*(holders[i].(*int32)))
+			default:
 				data[name] = toByteArray(*(holders[i].(*interface{})))
 			}
 		}
