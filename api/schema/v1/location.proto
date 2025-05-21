@@ -11,8 +11,8 @@ message LocationData {
   double x = 2;
   double y = 3;
   double z = 4;
-  double pitch = 5;
-  double yaw = 6;
+  float pitch = 5;
+  float yaw = 6;
 
   enum World {
     ALTERRA = 0;
