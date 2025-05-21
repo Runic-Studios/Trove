@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.runicrealms.trove"
-version = "0.0.26-SNAPSHOT"
+version = "0.0.27-SNAPSHOT"
 
 repositories {
     mavenCentral()
