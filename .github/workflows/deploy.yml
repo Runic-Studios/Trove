@@ -30,7 +30,7 @@ jobs:
       - name: Build Server
         run: |
           cd server
-          export PATH="$PATH:$(go env GOPATH)/bin"
+          export PATH="$PATH:/root/go/bin:$(go env GOPATH)/bin"
           ./gen-proto.sh
           go mod download
           go build -buildvcs=false -o trove-server ./cmd
