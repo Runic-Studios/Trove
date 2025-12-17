@@ -96,7 +96,6 @@ jobs:
             notifications
             jdks
 
-
       - name: Build and Publish Client
         env:
           REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}
