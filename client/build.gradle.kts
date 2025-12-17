@@ -84,7 +84,7 @@ publishing {
     }
     repositories {
         maven {
-            name = "nexus"
+            name = "reposilite"
             url = uri("https://reposilite.runicrealms.com/releases/")
             credentials {
                 username = System.getenv("REPOSILITE_USERNAME")
