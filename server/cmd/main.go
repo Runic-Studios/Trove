@@ -16,7 +16,7 @@ import (
 func main() {
 	sess, err := db.NewSession()
 	if err != nil {
-		log.Fatalf("failed to create scylla session: %v", err)
+		log.Fatalf("failed to create scylla session: %+v", err)
 	}
 	defer sess.Close()
 
@@ -28,15 +28,15 @@ func main() {
 
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		log.Fatalf("failed to listen on :%s, %v", port, err)
+		log.Fatalf("failed to listen on :%s, %+v", port, err)
 	}
 
 	grpcServer := grpc.NewServer()
-	srv := service.NewTroveServer(sess, transformers.Transformers)
+	srv := service.NewTroveServer(sess, transformers.V1Transformer)
 	trove.RegisterTroveServiceServer(grpcServer, srv)
 
 	fmt.Printf("Trove-Server listening on :%s\n", port)
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve gRPC: %v", err)
+		log.Fatalf("failed to serve gRPC: %+v", err)
 	}
 }

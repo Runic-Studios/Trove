@@ -3,7 +3,10 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent("registry.runicrealms.com")
+            yaml jenkinsAgent([
+                'agent-go-protoc': 'registry.runicrealms.com/jenkins/agent-go-protoc:latest',
+                'agent-java-21': 'registry.runicrealms.com/jenkins/agent-java-21:latest'
+            ])
         }
     }
 
@@ -36,19 +39,38 @@ pipeline {
                 }
             }
         }
-        stage('Build and Push Docker Image') {
+        stage('Build and Push Server Docker Image') {
             steps {
-                container('jenkins-agent') {
+                container('agent-go-protoc') {
                     script {
-                        dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                    sh """
+                    cd server
+                    export PATH="\$PATH:\$(go env GOPATH)/bin"
+                    ./gen-proto.sh
+                    go mod download
+                    go build -buildvcs=false -o trove-server ./cmd
+                    """
+                    dockerBuildPush("trove-server.Dockerfile", IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                    }
+                }
+            }
+        }
+        stage('Build and Publish Client Artifact') {
+            steps {
+                container('agent-java-21') {
+                    dir('client') {
+                        script {
+                            sh "./gradlew clean build --no-daemon"
+                            nexusPublish()
+                        }
                     }
                 }
             }
         }
         stage('Update Deployment') {
             steps {
-                container('jenkins-agent') {
-                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                container('agent-go-protoc') {
+                    updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'trove.server.tag')
                 }
             }
         }
@@ -57,7 +79,7 @@ pipeline {
                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
             }
             steps {
-                container('jenkins-agent') {
+                container('agent-go-protoc') {
                     createPR('Trove', 'Realm-Deployment', 'dev', 'main')
                 }
             }

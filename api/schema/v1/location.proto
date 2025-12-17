@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package schema.v1;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
+option java_multiple_files = true;
+
+message LocationData {
+  World world = 1;
+  double x = 2;
+  double y = 3;
+  double z = 4;
+  float pitch = 5;
+  float yaw = 6;
+
+  enum World {
+    ALTERRA = 0;
+    DUNGEONS = 1;
+  }
+}
+

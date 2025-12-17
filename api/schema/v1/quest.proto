@@ -1,0 +1,20 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package schema.v1;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
+option java_multiple_files = true;
+
+message QuestData {
+  bool started = 1;
+  bool completed = 2;
+  google.protobuf.Timestamp completionTime = 3;
+  map<string, ObjectiveState> objectives = 5;
+
+  message ObjectiveState {
+    bool completed = 1;
+    google.protobuf.Timestamp completionTime = 2;
+  }
+}

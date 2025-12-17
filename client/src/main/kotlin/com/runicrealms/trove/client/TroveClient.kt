@@ -1,54 +1,23 @@
 package com.runicrealms.trove.client
 
-import com.runicrealms.trove.generated.api.*
+import com.runicrealms.trove.client.user.UserClaim
+import com.runicrealms.trove.generated.api.trove.LockInfo
+import com.runicrealms.trove.generated.api.trove.TroveServiceGrpcKt
 import io.grpc.ManagedChannel
-import kotlinx.coroutines.runBlocking
-import org.springframework.stereotype.Service
+import java.util.UUID
 
-@Service
-class TroveClient(private val troveManagedChannel: ManagedChannel) {
+class TroveClient(private val troveManagedChannel: ManagedChannel, private val serverId: String) {
 
     private val stub by lazy {
         TroveServiceGrpcKt.TroveServiceCoroutineStub(troveManagedChannel)
     }
 
-    /**
-     * Save data to the trove server
-     * @param databaseName e.g. "players"
-     * @param schemaVersion e.g. 2
-     * @param dataBlob the serialized Protobuf for your domain data
-     * @param recordId the unique ID e.g. "player-123"
-     */
-    fun saveData(
-        databaseName: String,
-        schemaVersion: Int,
-        dataBlob: ByteArray,
-        recordId: String
-    ): SaveDataResponse = runBlocking {
-        stub.saveData(
-            SaveDataRequest.newBuilder()
-                .setDatabaseName(databaseName)
-                .setSchemaVersion(schemaVersion)
-                .setDataBlob(com.google.protobuf.ByteString.copyFrom(dataBlob))
-                .setRecordId(recordId)
-                .build()
-        )
+    suspend fun createClaim(user: UUID, leaseExpiryMillis: Long): Result<UserClaim> {
+        val lockInfo = LockInfo.newBuilder().setUserId(user.toString()).setServerId(serverId).build()
+        val claim = UserClaim(user, lockInfo, stub, leaseExpiryMillis)
+        val result = claim.refreshLease()
+        if (result.isFailure) return Result.failure(result.exceptionOrNull()!!)
+        return Result.success(claim)
     }
 
-    /**
-     * Load data from the trove server
-     * @param databaseName e.g. "players"
-     * @param recordId the unique ID e.g. "player-123"
-     */
-    fun loadData(
-        databaseName: String,
-        recordId: String
-    ): LoadDataResponse = runBlocking {
-        stub.loadData(
-            LoadDataRequest.newBuilder()
-                .setDatabaseName(databaseName)
-                .setRecordId(recordId)
-                .build()
-        )
-    }
 }

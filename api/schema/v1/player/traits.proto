@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+package schema.v1.players;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/players/v1;playersv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.players";
+option java_multiple_files = true;
+
+message PlayerTraitsData {
+  google.protobuf.Timestamp lastLogin = 1;
+  google.protobuf.Duration playTime = 2;
+}

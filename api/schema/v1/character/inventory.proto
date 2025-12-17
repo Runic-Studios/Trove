@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "schema/v1/item.proto";
+
+package schema.v1.character;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1/character;characterv1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1.character";
+option java_multiple_files = true;
+
+message CharacterInventoryData {
+  map<int32, ItemDataStack> items = 1;
+}

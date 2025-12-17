@@ -1,0 +1,68 @@
+syntax = "proto3";
+import "schema/v1/class.proto";
+import "schema/v1/stat.proto";
+
+package schema.v1;
+
+option go_package = "github.com/Runic-Studios/Trove/server/gen/api/schema/v1;v1";
+option java_package = "com.runicrealms.trove.generated.api.schema.v1";
+option java_multiple_files = true;
+
+message ItemDataStack {
+  ItemData data = 1;
+  int32 count = 2;
+}
+
+message ItemData {
+  string templateID = 1;
+  map<string, string> customData = 2;
+  oneof typeData {
+    ArmorData armor = 3;
+    GemData gem = 4;
+    OffhandData offhand = 5;
+    WeaponData weapon = 6;
+  }
+
+  message ArmorData {
+    repeated RolledStat stats = 1;
+    repeated GemBonus gemBonuses = 2;
+    repeated Perk perks = 3;
+  }
+
+  message GemData {
+    GemBonus bonus = 1;
+  }
+
+  message OffhandData {
+    repeated RolledStat stats = 1;
+    repeated Perk perks = 2;
+  }
+
+  message WeaponData {
+    repeated RolledStat stats = 1;
+    repeated Perk perks = 2;
+    optional string skinID = 3;
+  }
+
+  message RolledStat {
+    StatType type = 1;
+    double rollPercentage = 2;
+  }
+
+  message StaticStat {
+    StatType type = 1;
+    int32 amount = 2;
+  }
+
+  message GemBonus {
+    repeated StaticStat stats = 1;
+    int32 health = 2;
+    StatType mainStat = 3;
+    int32 tier = 4;
+  }
+
+  message Perk {
+    string perkID = 1;
+    int32 stacks = 2;
+  }
+}
